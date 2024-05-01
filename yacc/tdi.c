@@ -16,13 +16,8 @@ int idInst=0;
 Instruction tdi[MAX_TDI];
 
 
-void tiAdd(char * Action, int addr, int val)
+void tiAdd(char * Action)
 {
-    if (id <MAX_TDI) {
-        strcpy(tdi[idInst].action, Action);
-        tdi[idInst].tsAddr = addr;
-        tdi[idInst].value = val;
-        printf("%s %d %d\n", tdi[idInst].action, addr, val);
-        idInst++;
-    }
+    int t = id-1;
+    printf("%s %d %d\n", Action, t, myStack->address);
 }

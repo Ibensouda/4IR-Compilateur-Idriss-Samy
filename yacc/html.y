@@ -6,7 +6,6 @@
 #include "tdi.h"
 #include "html.tab.h"
 
-Symbol s;
 %}
 
 %code provides {
@@ -31,7 +30,8 @@ program:
        | program fonc_declaration
        ;
 
-return_statement: tRETURN expression tSEMI
+return_statement: tRETURN tNB tSEMI
+                |tRETURN tID tSEMI 
 print_statement: tPRINT expression tSEMI  
 
 if_statement: tIF {incrementerS();} tLPAR expression tRPAR  tLBRACE instructions tRBRACE {decrementerS();}
@@ -42,15 +42,16 @@ while_statement: tWHILE {incrementerS();} tLPAR expression tRPAR tLBRACE instruc
                ;
 
 print_statement: tPRINT tLPAR tID tRPAR tSEMI 
+                |tPRINT tLPAR tNB tRPAR tSEMI 
                ;
 
 int_declaration: tINT int_declaration tSEMI 
-                | tINT int_declaration tASSIGN expression tSEMI 
-                | tID tCOMMA int_declaration {createSymbol($1, 1, scopeG);} 
-                | tID  {createSymbol($1, 1, scopeG);}
+                | tINT int_declaration tASSIGN arith tSEMI {tiAdd("AFC"); deleteSymboltmp();}
+                | tID {createSymbol($1);} tCOMMA int_declaration  
+                | tID  {createSymbol($1);}
                 ;
 
-int_assignment: tID tASSIGN expression tSEMI  {tiAdd("AFC", searchSymbol("tmp3"), );}
+int_assignment: tID tASSIGN arith tSEMI {tiAdd("AFC"); deleteSymboltmp();}
 
 fonc_declaration: tINT tID {incrementerS();} tLPAR params tRPAR tLBRACE instructions  return_statement tRBRACE {decrementerS();}
                 | tVOID tID {incrementerS();} tLPAR params tRPAR tLBRACE instructions tRBRACE {decrementerS();}
@@ -69,28 +70,34 @@ instructions: if_statement
                 ;
 
 params: tVOID
-      | tINT tID tCOMMA  params {createSymbol($2, 1, scopeG);}
-      | tVOID tID tCOMMA params {createSymbol($2, 1, scopeG);}
-      | tINT tID {createSymbol($2, 1, scopeG);}
-      | tVOID tID {createSymbol($2, 0, scopeG);}
+      | tINT tID tCOMMA  params {createSymbol($2);}
+      | tVOID tID tCOMMA params {createSymbol($2);}
+      | tINT tID {createSymbol($2);}
+      | tVOID tID {createSymbol($2);}
       ;
     
-expression: expression tADD expression 
-          | expression tSUB expression 
-          | expression tMUL expression 
-          | expression tDIV expression 
-          | expression tEQ expression 
+arith: arith tADD arith 
+          | arith tSUB arith 
+          | arith tMUL arith 
+          | arith tDIV arith  
+          | tID {createSymbolTmp("tmp", 0);}
+          | tID tLPAR args tRPAR
+          | tNB {createSymbolTmp("tmp", $1);}
+          ;
+
+expression : expression tEQ expression 
           | expression tCOMMA expression 
           | expression tLE expression 
           | expression tGE expression 
           | expression tNE expression 
           | expression tLT expression 
           | expression tGT expression 
-          | tID tLPAR  expression tRPAR 
-          | tID 
-          | tNB {createSymbol("tmp3", 1, scopeG);}
+          | tID {createSymbolTmp($1, 5);}
+          | tNB {createSymbolTmp("tmp", $1);}
           ;
 
+args: arith
+    | arith tCOMMA args
 %%
 
 void yyerror(const char *msg) {

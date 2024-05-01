@@ -6,21 +6,21 @@
 
 static int scopeG;
 
-typedef struct {
+typedef struct stack {
     char name[MAX_NAME_LENGTH];
-    int type;
     int scope;
-} Symbol;
+    int address;
+    int value;
+} SymbolStack;
 
 extern int id;
-extern Symbol tds[MAX_SYMBOLS];
+extern SymbolStack * myStack;
 
-void incrementerS();
-void decrementerS();
-void createSymbol(char *name, int type, int scope);
-int createSymbolTmp(void);
+void incrementerS(void);
+void decrementerS(void);
+void createSymbol(char *name);
+int createSymbolTmp(char * name, int val);
 int searchSymbol(char *namesearch);
 int tsGetAddress(char * a);
-int createSymbolTmp(void);
-
+void deleteSymboltmp(void);
 #endif /* SYMBOL_TABLE_H */

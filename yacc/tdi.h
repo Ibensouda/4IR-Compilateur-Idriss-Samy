@@ -11,6 +11,6 @@ typedef struct
     int x;      
 } Instruction;
 
-void tiAdd(char * Action, int addr, int val);
+void tiAdd(char * Action);
 
 #endif /* TDS_H */
