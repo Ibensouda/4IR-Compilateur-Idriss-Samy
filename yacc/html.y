@@ -27,46 +27,40 @@
 %%
 
 program: 
-       | program fonc_declaration
+       | program fonc_declaration {printInstruction();}
        ;
 
-return_statement: tRETURN tNB tSEMI
-                |tRETURN tID tSEMI 
+return_statement: tRETURN arith tSEMI
+
 print_statement: tPRINT expression tSEMI  
 
-if_statement: tIF {incrementerS();} tLPAR expression tRPAR  tLBRACE instructions tRBRACE {decrementerS();}
+if_statement: tIF {incrementerS();} tLPAR expression tRPAR  tLBRACE {tiAddJMF();deleteSymboltmp();} instructions tRBRACE  {decrementerS(); updateJMF();}
               | if_statement tELSE {incrementerS();} tLBRACE instructions tRBRACE {decrementerS();}
 
 
-while_statement: tWHILE {incrementerS();} tLPAR expression tRPAR tLBRACE instructions tRBRACE{decrementerS();}
+while_statement: tWHILE {incrementerS();} tLPAR expression tRPAR tLBRACE {tiAddJMF();deleteSymboltmp();} instructions tRBRACE{decrementerS();updateJMF();}
                ;
 
-print_statement: tPRINT tLPAR tID tRPAR tSEMI 
-                |tPRINT tLPAR tNB tRPAR tSEMI 
-               ;
+print_statement: tPRINT tLPAR tID tRPAR tSEMI;
 
-int_declaration: tINT int_declaration tSEMI 
-                | tINT int_declaration tASSIGN arith tSEMI {tiAdd("AFC"); deleteSymboltmp();}
-                | tID {createSymbol($1);} tCOMMA int_declaration  
-                | tID  {createSymbol($1);}
+
+int_declaration : tINT int_declaration
+                | tID {createSymbol($1); addCOP($1);}
+                | tID {createSymbol($1);} tASSIGN arith {addCOP($1);} 
+                | tID tCOMMA {createSymbol($1); addCOP($1);} int_declaration 
                 ;
 
-int_assignment: tID tASSIGN arith tSEMI {tiAdd("AFC"); deleteSymboltmp();}
 
-fonc_declaration: tINT tID {incrementerS();} tLPAR params tRPAR tLBRACE instructions  return_statement tRBRACE {decrementerS();}
+
+fonc_declaration: tINT tID {incrementerS();} tLPAR params tRPAR tLBRACE instructions  tRBRACE {decrementerS();}
                 | tVOID tID {incrementerS();} tLPAR params tRPAR tLBRACE instructions tRBRACE {decrementerS();}
                 ;
 
-instructions: if_statement 
-                | while_statement 
-                | print_statement 
-                | int_declaration 
-                | int_assignment
-                | if_statement instructions 
+instructions: if_statement instructions
                 | while_statement instructions 
                 | print_statement instructions 
-                | int_declaration instructions 
-                | int_assignment instructions
+                | int_declaration tSEMI instructions 
+                | return_statement
                 ;
 
 params: tVOID
@@ -76,13 +70,13 @@ params: tVOID
       | tVOID tID {createSymbol($2);}
       ;
     
-arith: arith tADD arith 
+arith: arith tADD arith {int addr1 = searchSymbol("tmp"); deleteSymboltmp(); addMUL(addr1);}
           | arith tSUB arith 
-          | arith tMUL arith 
+          | arith tMUL arith {int addr1 = searchSymbol("tmp"); deleteSymboltmp(); addADD(addr1);}
           | arith tDIV arith  
-          | tID {createSymbolTmp("tmp", 0);}
+          | tID {createSymbol("tmp"); addCOP($1);}
           | tID tLPAR args tRPAR
-          | tNB {createSymbolTmp("tmp", $1);}
+          | tNB {createSymbol("tmp"); setValue($1);}
           ;
 
 expression : expression tEQ expression 
@@ -92,8 +86,8 @@ expression : expression tEQ expression
           | expression tNE expression 
           | expression tLT expression 
           | expression tGT expression 
-          | tID {createSymbolTmp($1, 5);}
-          | tNB {createSymbolTmp("tmp", $1);}
+          | tID {createSymbol("tmp");  addCOPIF($1);}
+          | tNB {createSymbol("tmp");  setValue($1);}
           ;
 
 args: arith

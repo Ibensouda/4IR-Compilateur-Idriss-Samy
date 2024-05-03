@@ -21,31 +21,7 @@ SymbolStack * myStack = NULL;
 void incrementerS() {scopeG++;}
 void decrementerS() {scopeG--;}
 
-void createSymbol(char * nameParam) 
-{
-    int precedent;
-    precedent = 0;
-    if (precedent != -1) {
-        SymbolStack * stackP = myStack;
-        SymbolStack * stackN = NULL;
-        stackN = malloc(sizeof(SymbolStack));
-        strcpy(stackN->name, nameParam);
-        stackN->scope = scopeG;
-        stackN->precedent = stackP;
-        stackN->address = id;
-        printf("%d, %s\n", stackN->address, stackN->name);
-        myStack = stackN;
-        id++;
-    }
-    // if (id < MAX_TDS) {
-    //     printf("%s %d\n", name, scopeG);
-    //     strcpy(tds[id].name, name);
-    //     printf("%s\n", tds[id].name);
-    //     tds[id].type = type;
-    //     tds[id].scope = scope;
-    //     id++;
-    // }
-}
+
 void createSymbolTmp(char * nameParam, int val) 
 {
     int precedent;
@@ -59,7 +35,7 @@ void createSymbolTmp(char * nameParam, int val)
         stackN->precedent = stackP;
         stackN->address = id;
         stackN->value = val;
-        printf("%d, %s\n", stackN->address, stackN->name);
+        //printf("%d, %s\n", stackN->address, stackN->name);
         myStack = stackN;
         id++;
     }
@@ -76,8 +52,8 @@ int searchSymbol(char * nameSearch)
             }
             tmpStack = (tmpStack)->precedent;
         }
-        return result;
     }
+    return result;
     // for (int j=0; j<MAX_TDS; j++)
     // {
     //     if (strcmp(tds[j].name, namesearch) == 0)
@@ -86,7 +62,31 @@ int searchSymbol(char * nameSearch)
     //     }
     // }
 }
-
+void createSymbol(char * nameParam) 
+{
+    int precedent;
+    precedent = 0;
+    if (precedent != -1 && searchSymbol(nameParam) == -1) {
+        SymbolStack * stackP = myStack;
+        SymbolStack * stackN = NULL;
+        stackN = malloc(sizeof(SymbolStack));
+        strcpy(stackN->name, nameParam);
+        stackN->scope = scopeG;
+        stackN->precedent = stackP;
+        stackN->address = id;
+        //printf("%d, %s\n", stackN->address, stackN->name);
+        myStack = stackN;
+        id++;
+    }
+    // if (id < MAX_TDS) {
+    //     printf("%s %d\n", name, scopeG);
+    //     strcpy(tds[id].name, name);
+    //     printf("%s\n", tds[id].name);
+    //     tds[id].type = type;
+    //     tds[id].scope = scope;
+    //     id++;
+    // }
+}
 void deleteSymboltmp() {
     if (myStack != NULL) {
         SymbolStack * stackP = myStack;
@@ -94,5 +94,22 @@ void deleteSymboltmp() {
         id--;
         free(myStack);
         myStack = stackN;
+    }
+}
+
+SymbolStack * getLastSymbol(){
+    return myStack;
+}
+
+void printStack() {
+    if (myStack != NULL) {
+        SymbolStack * tmpStack = myStack;
+        printf("---------------------Etat de la pile----------------------\n");
+        while (tmpStack->precedent != NULL) {
+            printf("%d, %s\n", tmpStack->address, tmpStack->name);
+            tmpStack = tmpStack->precedent;
+        }
+        printf("%d, %s\n", tmpStack->address, tmpStack->name);
+        printf("---------------------Fin Etat de la pile------------------\n");
     }
 }

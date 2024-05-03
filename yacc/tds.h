@@ -23,4 +23,6 @@ int createSymbolTmp(char * name, int val);
 int searchSymbol(char *namesearch);
 int tsGetAddress(char * a);
 void deleteSymboltmp(void);
+SymbolStack * getLastSymbol(void);
+void printStack(void);
 #endif /* SYMBOL_TABLE_H */
